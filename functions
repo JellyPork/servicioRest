@@ -1,0 +1,101 @@
+async function crearPropiedad(req, res) {
+  const { clave_catastral, descripcion, propietarios,arrendatario } = req.body;
+
+  // Verificar que no se esté repitiendo la propiedad
+  if (propiedades.some(propiedad => propiedad.clave_catastral === clave_catastral)) {
+    return res.status(400).json({ message: 'La propiedad ya existe' });
+  }
+
+  // Verificar si los propietarios ya existen y agregarlos a la propiedad
+  const propietariosPropiedad = [];
+  if (propietarios && propietarios.length > 0) {
+    for (const propietario of propietarios) {
+      const { RFC } = propietario;
+      const existePropietario = await propietariosControlador.obtenerPropietarioPorRFC(RFC);
+      if (existePropietario) {
+          propietariosPropiedad.push(existePropietario);
+
+      } else {
+        const nuevoPropietario = await propietariosControlador.crearPropietarioAuto(propietario);
+        propietariosPropiedad.push(nuevoPropietario);
+     
+        }   
+        //Se agrega la propiedad al propietario no importa si fue creado el nuevo propietario o ya existia
+        const propiedadPropietario = [];
+        propiedadPropietario.push({ clave_catastral, descripcion, propietarios: [], arrendatario, imagenes: [] });
+        await propietariosControlador.actualizarPropietarioPropiedades(propiedadPropietario,RFC)
+    }
+  }
+  //Se verifica que el arrendatario exista y agregarlo
+    if (arrendatario != null) {
+        const { RFC } = arrendatario;
+        const existeArrendatario = await arrendatariosControlador.obtenerArrendatarioPorRFC(RFC);
+        if (existeArrendatario) {
+
+        } else {
+            const nuevoArrendatario = await arrendatariosControlador.crearArrendatarioAuto(arrendatario);
+        }
+        //Se agrega la propiedad al arrendatario
+        const propiedadPropietario = [];
+        propiedadPropietario.push({ clave_catastral, descripcion, propietarios: [], arrendatario, imagenes: [] });
+    }
+  // Agregar la propiedad a la lista
+    propiedades.push({ clave_catastral, descripcion, propietarios: propietariosPropiedad, arrendatario, imagenes: [] });
+    
+
+  res.json({ message: 'Propiedad creada exitosamente' });
+}
+
+// Actualizar una propiedad
+function actualizarPropiedad(req, res) {
+  const claveCatastral = req.params.id;
+  const propiedad = propiedades.find(propiedad => propiedad.clave_catastral === claveCatastral);
+  if (!propiedad) {
+    return res.status(404).send('Propiedad no encontrada');
+  }
+
+  propiedad.descripcion = req.body.descripcion || propiedad.descripcion;
+  propiedad.propietarios = req.body.propietarios || propiedad.propietarios;
+  propiedad.arrendatario = req.body.arrendatario || propiedad.arrendatario;
+  propiedad.imagenes = req.body.imagenes || propiedad.imagenes;
+
+  res.send('Propiedad actualizada exitosamente');
+}
+
+// Eliminar una propiedad
+function eliminarPropiedad(req, res) {
+  const claveCatastral = req.params.id;
+  const index = propiedades.findIndex(index => index.clave_catastral === claveCatastral);
+
+  if (index === -1) {
+    return res.status(404).send('Propiedad no encontrada');
+  }
+
+  propiedades.splice(index, 1);
+
+  res.send('Propiedad eliminada exitosamente');
+}
+
+function crearPropiedad(propiedadBody) {
+  const { clave_catastral, descripcion, propietarios, arrendatario } = propiedadBody;
+  if (propiedades.some(propiedad => propiedad.clave_catastral === clave_catastral)) {
+    return "La propiedad ya existe";
+  }
+
+  if (propietarios.length > 0) {
+    for (const propietario of propietarios) {
+      const existePropietario = propietariosMod.findByRFC(propietario.RFC);
+      if (existePropietario) {
+        propietariosMod.agregarPropiedades(propiedadBody,propietario.RFC);
+
+      } else {
+        propietariosMod.crearPropietario(propietario);
+      }
+
+    }
+  }
+
+  // Agregar la propiedad a la lista
+  propiedades.push({ clave_catastral, descripcion, propietarios, arrendatario, imagenes: [] });
+  return "Propiedad Creada exitosamente";  
+}
