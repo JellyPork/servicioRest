@@ -1,5 +1,7 @@
 const express = require('express');
 const bodyParser = require('body-parser');
+const fs = require('fs');
+const https = require('https');
 
 const propiedadesController = require('./controladores/propiedadesController');
 const propietariosController = require('./controladores/propietariosController');
@@ -7,7 +9,14 @@ const arrendatariosController = require('./controladores/arrendatariosController
 
 const app = express();
 const port = 3000;
+// Iniciar servidor
 
+https.createServer({
+  cert: fs.readFileSync('server.cer'),
+  key: fs.readFileSync('server.key')
+},app).listen(port, () => {
+  console.log(`Servidor iniciado en http://localhost:${port}`);
+});
 // Configurar middleware
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
@@ -48,7 +57,3 @@ app.delete('/arrendatarios/delete/:id', arrendatariosController.llamarEliminarAr
 app.put('/arrendatarios/asignarPropiedad/:id/:rfc', arrendatariosController.llamarAsignarPropiedad);
 
 
-// Iniciar servidor
-app.listen(port, () => {
-  console.log(`Servidor iniciado en http://localhost:${port}`);
-});
