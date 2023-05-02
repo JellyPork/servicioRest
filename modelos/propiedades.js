@@ -1,4 +1,4 @@
-const propietariosMod = require('../modelos/propietarios');
+const propietariosMod = require('./propietarios');
 const e = require('cors');
 
 
