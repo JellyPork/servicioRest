@@ -52,8 +52,6 @@ function eliminarArrendatario(rfc) {
   }
 
   arrendatarios.splice(index, 1);
-
-  
 }
 
 

@@ -14,5 +14,7 @@ router.delete('/:id', arrendatariosController.llamarEliminarArrendatario);
 router.put('/asignarPropiedad/:id/:rfc', arrendatariosController.llamarAsignarPropiedad);
 
 
+
+
 module.exports = router;
 
